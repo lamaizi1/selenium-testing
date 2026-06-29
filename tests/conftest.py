@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -6,11 +8,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 @pytest.fixture
 def driver():
-
     options = webdriver.ChromeOptions()
 
-    # Décommente cette ligne pour GitHub Actions
-    options.add_argument("--headless=new")
+    if os.getenv("HEADLESS") == "true":
+        options.add_argument("--headless=new")
 
     options.add_argument("--start-maximized")
     options.add_argument("--window-size=1920,1080")

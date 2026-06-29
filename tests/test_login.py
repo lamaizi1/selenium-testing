@@ -1,39 +1,32 @@
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Lancer Chrome
-driver = webdriver.Chrome()
-driver.maximize_window()
 
-# Ouvrir SauceDemo
-driver.get("https://www.saucedemo.com/")
+def test_login(driver):
 
-# Attendre au maximum 10 secondes que le champ username soit présent
-wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 10)
 
-# Username
-username = wait.until(
-    EC.presence_of_element_located((By.ID, "user-name"))
-)
-username.send_keys("standard_user")
+    # Ouvrir SauceDemo
+    driver.get("https://www.saucedemo.com/")
 
-# Password
-password = driver.find_element(By.ID, "password")
-password.send_keys("secret_sauce")
+    # Username
+    username = wait.until(
+        EC.presence_of_element_located((By.ID, "user-name"))
+    )
+    username.send_keys("standard_user")
 
-# Login
-login_button = driver.find_element(By.ID, "login-button")
-login_button.click()
+    # Password
+    driver.find_element(By.ID, "password").send_keys("secret_sauce")
 
-# Vérifier que le titre "Products" apparaît
-products_title = wait.until(
-    EC.visibility_of_element_located((By.CLASS_NAME, "title"))
-)
+    # Login
+    driver.find_element(By.ID, "login-button").click()
 
-assert products_title.text == "Products"
+    # Vérifier que le titre apparaît
+    products_title = wait.until(
+        EC.visibility_of_element_located((By.CLASS_NAME, "title"))
+    )
 
-print("✅ Test Passed : Login réussi")
+    assert products_title.text == "Products"
 
-driver.quit()
+    print("✅ Test Passed : Login réussi")

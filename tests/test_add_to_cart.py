@@ -1,49 +1,58 @@
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import utils.screenshot
 
-# Lancer Chrome
-driver = webdriver.Chrome()
-driver.maximize_window()
 
-# Ouvrir SauceDemo
-driver.get("https://www.saucedemo.com/")
+def test_add_to_cart(driver):
 
-# Attente explicite
-wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 10)
 
-# Connexion
-wait.until(
-    EC.presence_of_element_located((By.ID, "user-name"))
-).send_keys("standard_user")
+    # Ouvrir SauceDemo
+    driver.get("https://www.saucedemo.com/")
 
-driver.find_element(By.ID, "password").send_keys("secret_sauce")
-driver.find_element(By.ID, "login-button").click()
+    # Connexion
+    wait.until(
+        EC.presence_of_element_located((By.ID, "user-name"))
+    ).send_keys("standard_user")
 
-try:
-    # Vérifier que le produit est présent
-    product = wait.until(
-        EC.visibility_of_element_located((By.CLASS_NAME, "inventory_item_name"))
+    driver.find_element(By.ID, "password").send_keys("secret_sauce")
+    driver.find_element(By.ID, "login-button").click()
+
+    # Attendre que la page Products soit chargée
+    wait.until(
+        EC.visibility_of_element_located((By.CLASS_NAME, "title"))
     )
 
-    # Vérifier que le bon produit est affiché
-    assert product.text == "Sauce Labs Backpack"
+    # Ajouter le produit au panier
+    driver.find_element(
+        By.ID,
+        "add-to-cart-sauce-labs-backpack"
+    ).click()
 
-    print("✅ Test Passed : Produit ajouté au panier avec succès.")
+    # Ouvrir le panier
+    driver.find_element(
+        By.CLASS_NAME,
+        "shopping_cart_link"
+    ).click()
 
-    # Capture d'écran en cas de succès
-    utils.screenshot.take_screenshot(driver, "add_to_cart_success")
+    try:
+        product = wait.until(
+            EC.visibility_of_element_located(
+                (By.CLASS_NAME, "inventory_item_name")
+            )
+        )
 
-except Exception as e:
-    print("❌ Test Failed")
+        assert product.text == "Sauce Labs Backpack"
 
-    # Capture d'écran en cas d'échec
-    utils.screenshot.take_screenshot(driver, "add_to_cart_failed")
+        utils.screenshot.take_screenshot(
+            driver,
+            "add_to_cart_success"
+        )
 
-    print(e)
-
-finally:
-    # Fermer le navigateur dans tous les cas
-    driver.quit()
+    except Exception:
+        utils.screenshot.take_screenshot(
+            driver,
+            "add_to_cart_failed"
+        )
+        raise
